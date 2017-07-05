@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<canvas id="cvs" width="1000" height="1000"></canvas>
+</body>
+</html>
+<script>
+    var cvs=document.getElementById("cvs");
+    var ctx=cvs.getContext("2d");
+    var w=20;
+    //弧度---Math.PI*2/60;
+    var r=12*w;//r*sin()
+    var date=new Date();
+    var dateS=date.getSeconds();
+    var dateM=date.getMinutes();
+    var dateH=date.getHours();
+    var i=dateS-15;
+    var m=15*(-60)+dateM*60+dateS;
+    var h=3*(-3600)+(dateH%12)*3600+dateS+dateM*60;
+    var originX=25*w;
+    var originY=25*w;
+    function second() {
+        var radian = (Math.PI * 2) / 60 * i;
+        var x = 25 * w + ((r-20) * Math.cos(radian));
+        var y = 25 * w + ((r-20) * Math.sin(radian));
+        ctx.beginPath();
+        ctx.strokeStyle="#000";
+        ctx.lineWidth=1;
+        ctx.lineCap="round";
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(x, y);
+        ctx.closePath();
+        ctx.stroke();
+        for(var j=0;j<12;j++){
+            var dial=(Math.PI * 2) / 12 * j;
+            ctx.beginPath();//绘制表盘
+            ctx.strokeStyle="red";
+            ctx.lineWidth="4";
+            ctx.moveTo(originX+(r-16) * Math.cos(dial),originY+(r-16) * Math.sin(dial));
+            ctx.lineTo(originX+(r) * Math.cos(dial),originY+(r) * Math.sin(dial));
+            ctx.closePath();
+            ctx.stroke();
+        }
+        for(var n=0;n<60;n++){
+            if(n%5!=0){
+                var dial1=(Math.PI * 2) / 60 * n;
+                ctx.beginPath();//绘制表盘
+                ctx.strokeStyle="#000";
+                ctx.lineWidth="2";
+                ctx.moveTo(originX+(r-10) * Math.cos(dial1),originY+(r-10) * Math.sin(dial1));
+                ctx.lineTo(originX+(r) * Math.cos(dial1),originY+(r) * Math.sin(dial1));
+                ctx.closePath();
+                ctx.stroke();
+            }
+        }
+        ctx.beginPath();//绘制旋转中心
+        ctx.fillStyle="#000";
+        ctx.arc(originX, originY, 5, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+    }
+    function minute() {
+        var radian = (Math.PI * 2) / 60 * m/60;
+        var x = 25 * w + (250 * Math.cos(radian));
+        var y = 25 * w + (150 * Math.sin(radian));
+        ctx.beginPath();
+        ctx.strokeStyle="#000";
+        ctx.lineWidth=3;
+        ctx.lineCap="round";
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(x, y);
+        ctx.closePath();
+        ctx.stroke();
+    }
+    function hour() {
+        var radian = (Math.PI * 2) / 60 * h/60/12;
+        var x = 25 * w + (200 * Math.cos(radian));
+        var y = 25 * w + (200 * Math.sin(radian));
+        ctx.beginPath();
+        ctx.strokeStyle="#000";
+        ctx.lineWidth=6;
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(x, y);
+        ctx.closePath();
+        ctx.stroke();
+    }
+    setInterval(function () {
+        i++;
+        h++;
+        m++;
+        ctx.clearRect(0,0,cvs.width,cvs.height);
+        second();
+        minute();
+        hour();
+    },1000)
+    
+</script>

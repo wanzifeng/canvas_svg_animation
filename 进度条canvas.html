@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+</head>
+<body>
+<canvas id="cvs" width="200" height="200"></canvas>
+</body>
+</html>
+<script>
+    var cvs=document.getElementById("cvs");
+    var ctx=cvs.getContext("2d");
+    var w=cvs.width;
+    var h=cvs.height;
+    var lineW=16;
+    var x=w/2;
+    var y=h/2;
+    var r=Math.min(w,h)/2-(lineW/2);
+    var progress=0;
+    var total=100;
+    var target=1;
+    function draw() {
+        if(progress>total){
+            return false;
+        }
+        ctx.clearRect(0,0,w,h);
+        ctx.font="50px/50px arial";
+        ctx.textAlign="center";
+        ctx.textBaseline="middle";
+        ctx.beginPath();
+        var text=((progress/total)*100).toFixed(2)+"%";
+        ctx.fillText(text,100,100);
+        ctx.beginPath();
+        ctx.strokeStyle="aqua";
+        ctx.lineWidth="16";
+        ctx.arc(x,y,r,0,Math.PI*2);
+        ctx.closePath();
+        ctx.stroke();
+        var start=Math.PI*3/2*progress/total;
+        var end=Math.PI*2*target*progress/total+start;
+        ctx.beginPath();
+        ctx.strokeStyle="red";
+        ctx.lineCap="round";
+        ctx.arc(x,y,r,start,end);
+        ctx.stroke();
+        progress++;
+        if(progress>100){
+            progress=0;
+        }
+    }
+    draw();
+    setInterval(function () {
+        draw();
+    },100)
+</script>

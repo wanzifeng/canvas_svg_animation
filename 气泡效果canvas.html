@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *{padding: 0;margin: 0}
+    </style>
+</head>
+<body>
+<canvas id="cvs" width="1000" height="1000"></canvas>
+</body>
+</html>
+<script>
+    var cvs=document.getElementById("cvs");
+    var ctx=cvs.getContext("2d");
+    function Dot(x,y,r,c,s,m) {
+        this.x=x;
+        this.y=y;
+        this.radius=r;
+        this.color=c;
+        this.speed=s;
+        this.max=m;
+        this.state=true;
+        this.draw=function () {
+            ctx.beginPath();
+            ctx.fillStyle=this.color;
+            ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+            ctx.closePath();
+            ctx.fill();
+            if(this.state){
+                this.radius+=this.speed;
+                if(this.radius>this.max){
+                    this.state=false;
+                }
+            }else{
+                this.radius-=this.speed;
+                if(this.radius<0){
+                    this.radius=0;
+                    this.state=true;
+                }
+            }
+        }
+    }
+   var arr=[];
+    function init() {
+        for(var i=0;i<100;i++){
+            var x=Math.random()*cvs.width;
+            var y=Math.random()*cvs.height;
+            var r=Math.random()*50+10;
+            var color_r=parseInt(Math.random()*255);
+            var color_g=parseInt(Math.random()*255);
+            var color_b=parseInt(Math.random()*255);
+            var color="rgb("+color_r+","+color_g+","+color_b+")";
+            var color_r1=parseInt(Math.random()*255);
+            var color_g1=parseInt(Math.random()*255);
+            var color_b1=parseInt(Math.random()*255);
+            var color1="rgb("+color_r1+","+color_g1+","+color_b1+")";
+            var color_r2=parseInt(Math.random()*255);
+            var color_g2=parseInt(Math.random()*255);
+            var color_b2=parseInt(Math.random()*255);
+            var color2="rgb("+color_r2+","+color_g2+","+color_b2+")";
+            var speed=Math.random()*3+1;
+            var maxR=Math.random()*100+r+10;
+            var g1=ctx.createRadialGradient(x,y,r,x,y,maxR);
+            g1.addColorStop(0,color);
+            g1.addColorStop(0.5,color1);
+            g1.addColorStop(1,color2);
+            arr.push(new Dot(x,y,r,g1,speed,maxR));
+        }
+    }
+    init();
+    setInterval(function () {
+        ctx.clearRect(0,0,cvs.width,cvs.height);
+        for(var i=0;i<arr.length;i++){
+            arr[i].draw();
+        }
+    },30);
+</script>

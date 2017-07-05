@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *{padding: 0;margin: 0;}
+        body{width: 100vw;height: 100vh;overflow: hidden;}
+        select{position: absolute;top:20px;left: 20px;width: 200px;height: 50px;font-size: 30px;line-height: 50px;}
+        .fontWidth{left: 250px;}
+        #cvs{border-right: 1px solid #000000;}
+    </style>
+    <script src="jquery-1.11.3.min.js"></script>
+</head>
+<body>
+<select class="color">
+    <option value="red">red</option>
+    <option value="green">green</option>
+    <option value="blue">blue</option>
+    <option value="orange">orange</option>
+    <option value="purple">purple</option>
+    <option value="yellow">yellow</option>
+</select>
+<select class="fontWidth">
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="15">15</option>
+    <option value="20">20</option>
+    <option value="25">25</option>
+    <option value="30">30</option>
+</select>
+
+<canvas id="cvs"></canvas>
+</body>
+</html>
+<script>
+    var cvs = document.getElementById("cvs");
+    var ctx = cvs.getContext("2d");
+    cvs.width = window.innerWidth/2;
+    cvs.height = window.innerHeight;
+    var lastX, lastY ,state,color="red",fontWidth="5";
+    var path="";
+    $('.fontWidth').change(function () {
+        fontWidth = $(this).val();
+    });
+    $('.color').change(function () {
+        color = $(this).val();
+    });
+    /*cvs.oncontextmenu=function () {
+      return false;
+    };*/
+    cvs.onmousedown = function (ev) {
+        if (ev.button == 0) {
+            state = 1;
+        }
+        if (ev.button == 2) {
+            state = 2;
+        }
+        var length=0;
+    };
+    cvs.onmousemove = function (ev) {
+        if (state == 1) {
+            paint(ev);
+        }
+        else if (state == 2) {
+            eraser(ev);
+        }
+    };
+    cvs.onmouseup = function (ev) {
+        state = 0;
+        console.log(path);
+        length=Math.ceil(length);
+        console.log(length);
+        length=0;
+        lastX = lastY = undefined;
+    };
+    function eraser(ev) {
+        lastX = ev.offsetX;
+        lastY = ev.offsetY;
+        ctx.clearRect(lastX - 20, lastY - 20, 40, 40);
+    }
+    function paint(ev) {
+        if (lastX == undefined) {
+            lastX = ev.offsetX;
+            lastY = ev.offsetY;
+            path+="M"+lastX+","+lastY;
+            return;
+        }
+        ctx.beginPath();
+        ctx.strokeStyle=color;
+      /*  ctx.lineCap="round";*/
+        ctx.lineJoin="round";
+        ctx.lineWidth=fontWidth;
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(ev.offsetX, ev.offsetY);
+        ctx.closePath();
+        ctx.stroke();
+        path+="L"+ev.offsetX+","+ev.offsetY;
+        length+=Math.sqrt(Math.pow(ev.offsetX-lastX,2)+Math.pow(ev.offsetY-lastY,2));
+        lastX = ev.offsetX;
+        lastY = ev.offsetY;
+    }
+</script>

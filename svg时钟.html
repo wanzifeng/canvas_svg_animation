@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery-1.11.3.min.js"></script>
+</head>
+<body>
+<svg width="500" height="500">
+    <!--<line x1="250" y1="250" x2="450" y2="250" stroke-width="5" stroke="purple"/>
+    <circle cx="250" cy="250" r="200" stroke-width="5" stroke="purple" fill="none"/>-->
+</svg>
+</body>
+</html>
+<script>
+    var ns="http://www.w3.org/2000/svg";//命名空间
+    var svg=$("svg");
+    var dom=document.createElementNS(ns,"circle");//表盘
+    $(dom).attr({
+        cx:250,
+        cy:250,
+        r:200,
+        "stroke-width":5,
+        stroke:"purple",
+        fill:"none"
+    }).appendTo(svg);
+    for(var i=0;i<60;i++){//刻度
+        var d=Math.PI*2/60*i-Math.PI*2/4;
+        dom=document.createElementNS(ns,"line");
+        $(dom).attr({
+            x1:i%5==0? 180*Math.cos(d)+250:190*Math.cos(d)+250,
+            y1:i%5==0? 180*Math.sin(d)+250:190*Math.sin(d)+250,
+            x2:200*Math.cos(d)+250,
+            y2:200*Math.sin(d)+250,
+            "stroke-width":"5",
+            stroke:"purple",
+            fill:"none"
+        }).appendTo(svg);
+    }
+    domS=document.createElementNS(ns,"line");
+    domM=document.createElementNS(ns,"line");
+    domH=document.createElementNS(ns,"line");
+    $(domS).appendTo(svg);
+    $(domM).appendTo(svg);
+    $(domH).appendTo(svg);
+    function run() {
+        var date=new Date();
+        var s=date.getSeconds();
+        var m=date.getMinutes();
+        var h=date.getHours();
+        var degS=Math.PI*2/60*s-Math.PI*2/4;
+        var degM=Math.PI*2/60*(m+s/60)-Math.PI*2/4;
+        var degH=Math.PI*2/12*(h+m/60+s/3600)-Math.PI*2/4;
+        $(domS).attr({
+            x1:250,
+            y1:250,
+            x2:175*Math.cos(degS)+250,
+            y2:175*Math.sin(degS)+250,
+            "stroke-width":"5",
+            stroke:"purple",
+            fill:"none"
+        });
+        $(domM).attr({
+            x1:250,
+            y1:250,
+            x2:150*Math.cos(degM)+250,
+            y2:150*Math.sin(degM)+250,
+            "stroke-width":"5",
+            stroke:"purple",
+            fill:"none"
+        });
+        $(domH).attr({
+            x1:250,
+            y1:250,
+            x2:110*Math.cos(degH)+250,
+            y2:110*Math.sin(degH)+250,
+            "stroke-width":"10",
+            stroke:"purple",
+            fill:"none",
+            "stroke-linecap":"round"
+        });
+    }
+    run();
+    setInterval(run,1000);
+</script>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        *{padding: 0;margin: 0;}
+        body{text-transform:capitalize;background-color: #efefef;}
+        #cvs{position: relative;left: 50%;margin-left:-262.5px;top:50px;}
+        button{position: absolute; width:100px;line-height: 40px;font-size: 22px;top:580px;left: 50%;}
+        #resume{margin-left:-262.5px;}
+        #startPause{margin-left:-100px;width:200px;}
+        #end{margin-left:162.5px;}
+        .scroll{width: 100px;height: 50px;line-height: 50px;position: absolute;left: 50%;top: 0;margin-left: -262.5px;font-size: 20px;}
+        .level{width: 100px;height: 50px;line-height: 50px;position: absolute;left: 50%;top: 0;margin-left: 162.5px;text-align: right;font-size: 20px;}
+        .easy{ width:100px; line-height: 40px;}
+        li{width: 100px;text-align: center;line-height: 40px;height: 40px;background-color: #00a2d4;list-style: none;margin-bottom: 40px;border-radius: 5px;cursor: pointer;}
+        ul{position: absolute;left: 50%;top: 180px;margin-left: -400px;}
+        li.active{background-color: #e8be50 ;color:#fff;}
+    </style>
+    <script src="js/jquery-1.11.3.min.js"></script>
+</head>
+<body>
+<div class="scroll">scroll:0</div>
+<div class="level">level:1</div>
+<ul>
+    <li class="easy active">easy</li>
+    <li class="normal">normal</li>
+    <li class="difficult">difficult</li>
+    <li class="hell">hell</li>
+</ul>
+<canvas id="cvs" width="525" height="525"></canvas>
+<button type="button" id="resume">resume</button>
+<button type="button" id="startPause">start/pause</button>
+<button type="button" id="end">end</button>
+</body>
+</html>
+<script>
+    $(function () {
+        var level=$('.level');
+        var cvs=document.getElementById("cvs");
+        var ctx=cvs.getContext("2d");
+        var blockage=25;//每个小方块宽25，高25；
+        var nibblesX=10*blockage;//蛇的移动坐标
+        var nibblesY=10*blockage;//蛇的移动坐标
+        var initX,initY;
+        var arrX=[];//用以记录撞到小黄块时的坐标值
+        var arrY=[];
+        var direction=Math.floor(Math.random()*4);
+        var n=0;
+        var timer,arrDown=[],arrNiX=[],arrNiY=[];
+        var interval=1000;
+        var intervalArr=[1000,500,200,50];
+        init();//初始化网格；
+        var fixationX,fixationY,num=0,state=true;
+        initNibble();//初始化蛇的位置
+        $('li').each(function (i) {
+            $(this).click(function () {
+                $('li').removeClass('active');
+                $(this).addClass('active');
+                interval=intervalArr[i];
+                if(n!=0){
+                    clearInterval(timer);
+                    timer=setInterval(move,interval);
+                }
+            });
+        });
+
+        function init() {//初始化格子
+            for(var i=0;i<21;i++){
+                for(var j=0;j<21;j++){
+                    ctx.strokeStyle="#666";
+                    ctx.strokeRect(i*blockage,j*blockage,blockage,blockage);
+                }
+            }
+        }
+        function yellowBlockage(praArray,argArray){//黄色小方块的位置
+            ctx.fillStyle="#FFA74E";
+            initX=Math.floor(Math.random()*21)*blockage;//初始出现的黄色方块；
+            initY=Math.floor(Math.random()*21)*blockage;
+            //让小黄快始终不出现在蛇身上；
+            for (var i = 0; i < praArray.length; i++) {
+                if (initX == praArray[i] && initY == argArray[i]) {
+                    yellowBlockage(praArray, argArray);
+                    return;
+                }
+            }
+            ctx.fillRect(initX, initY, blockage, blockage);
+        }
+        function initNibble() {
+            ctx.fillStyle = "#333";//蛇移动位置；
+            ctx.fillRect(nibblesX, nibblesY, blockage, blockage);//初始化蛇的位置
+        }
+        function move(){
+            arrNiX.push(nibblesX);//记录移动轨迹
+            arrNiY.push(nibblesY);//记录移动轨迹
+            ctx.clearRect(0,0,525,525);
+            init();
+            ctx.fillStyle="#FFA74E";
+            ctx.fillRect(fixationX,fixationY,blockage,blockage);
+            //draw后面跟随的蛇body部分；
+            if(direction==0){
+                nibblesX-=blockage;
+            }else if(direction==2){
+                nibblesX+=blockage;
+            }else if(direction==1){
+                nibblesY-=blockage;
+            }else{
+                nibblesY+=blockage;
+            }
+            ctx.fillStyle="#333";//蛇移动位置；
+            ctx.fillRect(nibblesX,nibblesY,blockage,blockage);
+            if(nibblesX>500||nibblesY>500||nibblesX<0||nibblesY<0){
+                if(confirm("you lose!\ntry again?")){
+                    resume();
+                    return;
+                }else {
+                    end();
+                    return;
+                }
+            }
+            if(nibblesX==fixationX&&nibblesY==fixationY){//若相撞，则记录下此时的坐标，跟随前一个的坐标
+                /*n++;*/
+                num++;
+                arrX.push(arrNiX[arrNiX.length-1-arrX.length-1]);
+                arrY.push(arrNiY[arrNiY.length-1-arrY.length-1]);
+                var judgeArrX=arrNiX.slice(arrNiX.length-1-num);
+                var judgeArrY=arrNiY.slice(arrNiY.length-1-num);
+                yellowBlockage(judgeArrX,judgeArrY);//重新随机一个小黄方块位置
+                fixationX=initX;//并再次记录下小黄方块的坐标值
+                fixationY=initY;
+            }
+            for(var j=0;j<arrX.length;j++){
+                arrX[j]=arrNiX[arrNiX.length-1-j];
+                arrY[j]=arrNiY[arrNiY.length-1-j];
+                ctx.fillStyle="#333";//；
+                ctx.fillRect(arrX[j],arrY[j],blockage,blockage);
+                if(nibblesX==arrX[j]&&nibblesY==arrY[j]){
+                    if(confirm("you lose!\ntry again?")){
+                        resume();
+                        return;
+                    }else {
+                        end();
+                        return;
+                    }
+                }
+            }
+            n++;
+            if(num>=0&&num<=10){
+                level.html('level:1');
+            }else if(num>10&&num<=20){
+                level.html('level:2');
+            }else if(num>20&&num<=50){
+                level.html('level:3');
+            }else if(num>50&&num<=100){
+                level.html('level:4');
+            }else if(num>100&&num<=200){
+                level.html('level:5');
+            }else if(num>200&&num<440){
+                level.html('level:6');
+            }else{
+                alert("you win!");
+                end();
+                return;
+            }
+            $('.scroll').html('scroll:'+num);
+        }
+        $(document).keydown(function (ev) {
+            arrDown.push(n);
+           if(ev.keyCode==37&&direction!=2&&arrDown[arrDown.length-1]!=arrDown[arrDown.length-2]){//使贪吃蛇不能后退且必须按给定的方向走一格后才能再次改变方向；
+               direction=0;
+           }
+           if(ev.keyCode==38&&direction!=3&&arrDown[arrDown.length-1]!=arrDown[arrDown.length-2]){
+                direction=1;
+           }
+            if(ev.keyCode==39&&direction!=0&&arrDown[arrDown.length-1]!=arrDown[arrDown.length-2]){
+                direction=2;
+            }
+            if(ev.keyCode==40&&direction!=1&&arrDown[arrDown.length-1]!=arrDown[arrDown.length-2]){
+                direction=3;
+            }
+            return false;
+        });
+        $('#resume').click(function () {
+            resume();
+        });
+        $("#startPause").click(function () {
+            if(n==0){
+                if(state){
+                    var arrInitX=[250];
+                    var arrInitY=[250];
+                    yellowBlockage(arrInitX,arrInitY);//初始化小黄块的位置；
+                    fixationX=initX;
+                    fixationY=initY;
+                    clearInterval(timer);
+                    timer=setInterval(move,interval);
+                    state=false;
+                    num=0;
+                    level.html('level:1');
+                    $('.scroll').html('scroll:0');
+                }else{
+                    clearInterval(timer);
+                    state=true;
+                }
+            }else{
+                if(state){
+                    clearInterval(timer);
+                    timer=setInterval(move,interval);
+                    state=false;
+                }else{
+                    clearInterval(timer);
+                    state=true;
+                }
+            }
+        });
+        $("#end").click(function () {
+            end();
+        });
+        function end() {
+            clearInterval(timer);
+            ctx.clearRect(0,0,525,525);
+            nibblesX=10*blockage;
+            nibblesY=10*blockage;
+            arrX=[];
+            arrY=[];
+            arrNiX=[];
+            arrNiY=[];
+            initNibble();
+            init();
+            n=0;
+            state=true;
+            num=0;
+            level.html('level:1');
+            $('.scroll').html('scroll:0');
+            /* yellowBlockage();*/
+        }
+        function resume() {
+            clearInterval(timer);
+            ctx.clearRect(0,0,525,525);
+            var arrInitX=[250];
+            var arrInitY=[250];
+            yellowBlockage(arrInitX,arrInitY);//初始化小黄块的位置；
+            fixationX=initX;
+            fixationY=initY;
+            nibblesX=10*blockage;
+            nibblesY=10*blockage;
+            arrX=[];
+            arrY=[];
+            arrNiX=[];
+            arrNiY=[];
+            initNibble();
+            init();
+            state=false;
+            num=0;
+            $('.scroll').html('scroll:0');
+            level.html('level:1');
+            timer=setInterval(move,interval);
+        }
+
+    });
+</script>
